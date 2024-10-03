@@ -68,10 +68,10 @@ public:
         float overlap = p1.radius + p2.radius - dist;
 
         if (overlap > 0) {
-            // Apply Hooke's law to calculate the force
+           
             float forceMagnitude = springConstant * overlap;
 
-            // Normalize direction vector
+            
             float fx = forceMagnitude * (dx / dist);
             float fy = forceMagnitude * (dy / dist);
 

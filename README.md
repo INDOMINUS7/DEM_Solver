@@ -1,6 +1,6 @@
 # DEM_Solver
 Particle-Wall Interaction Simulations
-This repository contains two toy problems showcasing the simulation of a particle interacting with the walls of a box using two distinct models: a Hard Sphere Model and a Soft Sphere Model with Hooke's Law.
+This repository contains toy problems showcasing the simulation of a particle interacting with the walls of a box using two distinct models: a Hard Sphere Model and a Soft Sphere Model with Hooke's Law.
 
 Overview
 

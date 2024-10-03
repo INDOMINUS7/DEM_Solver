@@ -4,6 +4,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+using namespace std;
+
 const float GRAVITY = 9.81;
 
 class Particle {
@@ -34,7 +36,6 @@ public:
 
     Box(float w, float h, float k) : width(w), height(h), springConstant(k) {}
 
-    // Check for collisions between particles and walls
     void handleWallCollisions(Particle &particle, float dt) {
         float overlap, force;
 
@@ -60,22 +61,18 @@ public:
         }
     }
 
-    // Handle collisions between particles
     void handleParticleCollisions(Particle &p1, Particle &p2, float dt) {
         float dx = p2.x - p1.x;
         float dy = p2.y - p1.y;
-        float dist = std::sqrt(dx * dx + dy * dy);
+        float dist = sqrt(dx * dx + dy * dy);
         float overlap = p1.radius + p2.radius - dist;
 
         if (overlap > 0) {
-           
             float forceMagnitude = springConstant * overlap;
 
-            
             float fx = forceMagnitude * (dx / dist);
             float fy = forceMagnitude * (dy / dist);
 
-            // Apply forces in opposite directions to both particles
             p1.applyForce(-fx, -fy, dt);
             p2.applyForce(fx, fy, dt);
         }
@@ -84,33 +81,29 @@ public:
 
 class Simulation {
 public:
-    std::vector<Particle> particles;
+    vector<Particle> particles;
     Box box;
     float timeStep;
 
-    Simulation(std::vector<Particle> p, Box b, float dt) : particles(p), box(b), timeStep(dt) {}
+    Simulation(vector<Particle> p, Box b, float dt) : particles(p), box(b), timeStep(dt) {}
 
-    std::vector<std::vector<float>> runStep() {
-        // Apply gravity and handle wall collisions for each particle
+    vector<vector<float>> runStep() {
         for (auto &particle : particles) {
             particle.applyGravity(timeStep);
             box.handleWallCollisions(particle, timeStep);
         }
 
-        // Handle particle-particle collisions
         for (size_t i = 0; i < particles.size(); ++i) {
             for (size_t j = i + 1; j < particles.size(); ++j) {
                 box.handleParticleCollisions(particles[i], particles[j], timeStep);
             }
         }
 
-        // Update positions for each particle
         for (auto &particle : particles) {
             particle.updatePosition(timeStep);
         }
 
-        // Return positions of all particles for visualization
-        std::vector<std::vector<float>> positions;
+        vector<vector<float>> positions;
         for (auto &particle : particles) {
             positions.push_back({particle.x, particle.y});
         }
@@ -141,6 +134,6 @@ PYBIND11_MODULE(FIFTH_TOY_PROBLEM, m) {
         .def_readwrite("springConstant", &Box::springConstant);
 
     py::class_<Simulation>(m, "Simulation")
-        .def(py::init<std::vector<Particle>, Box, float>())
+        .def(py::init<vector<Particle>, Box, float>())
         .def("runStep", &Simulation::runStep);
 }

@@ -4,7 +4,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-using namespace std;
+using namespace std; // Added this to avoid repeated std:: usage
 
 const float GRAVITY = 9.81;
 
@@ -36,6 +36,7 @@ public:
 
     Box(float w, float h, float k) : width(w), height(h), springConstant(k) {}
 
+    // Check for collisions between particles and walls
     void handleWallCollisions(Particle &particle, float dt) {
         float overlap, force;
 
@@ -61,6 +62,7 @@ public:
         }
     }
 
+    // Handle collisions between particles
     void handleParticleCollisions(Particle &p1, Particle &p2, float dt) {
         float dx = p2.x - p1.x;
         float dy = p2.y - p1.y;
@@ -68,11 +70,14 @@ public:
         float overlap = p1.radius + p2.radius - dist;
 
         if (overlap > 0) {
+            // Apply Hooke's law to calculate the force
             float forceMagnitude = springConstant * overlap;
 
+            // Normalize direction vector
             float fx = forceMagnitude * (dx / dist);
             float fy = forceMagnitude * (dy / dist);
 
+            // Apply forces in opposite directions to both particles
             p1.applyForce(-fx, -fy, dt);
             p2.applyForce(fx, fy, dt);
         }
@@ -85,24 +90,28 @@ public:
     Box box;
     float timeStep;
 
-    Simulation(vector<Particle> p, Box b, float dt) : particles(p), box(b), timeStep(dt) {}
+    Simulation(vector<Particle> p, Box b, float dt) : particles(move(p)), box(b), timeStep(dt) {}
 
     vector<vector<float>> runStep() {
+        // Apply gravity and handle wall collisions for each particle
         for (auto &particle : particles) {
             particle.applyGravity(timeStep);
             box.handleWallCollisions(particle, timeStep);
         }
 
+        // Handle particle-particle collisions
         for (size_t i = 0; i < particles.size(); ++i) {
             for (size_t j = i + 1; j < particles.size(); ++j) {
                 box.handleParticleCollisions(particles[i], particles[j], timeStep);
             }
         }
 
+        // Update positions for each particle
         for (auto &particle : particles) {
             particle.updatePosition(timeStep);
         }
 
+        // Return positions of all particles for visualization
         vector<vector<float>> positions;
         for (auto &particle : particles) {
             positions.push_back({particle.x, particle.y});
